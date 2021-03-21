@@ -33,6 +33,6 @@ services:
 
   web:
     build: .
-    #        command: python3 manage.py runserver 0.0.0.0:8000
-    #        container_name: webapp-dpdth
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; python3 manage.py runserver 0.0.0.0:8000'
+    command: /wait-for-it.sh db:5432 -- python3 manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ./wait-for-it.sh:/wait-for-it.sh
