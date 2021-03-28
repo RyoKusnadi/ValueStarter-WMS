@@ -31,12 +31,12 @@ class CategoryViewSet(viewsets.GenericViewSet,
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
     queryset = Category.objects.all()
-    serializer_class = serializers.TagSerializer
+    serializer_class = serializers.CategorySerializer
 
     def get_queryset(self):
         """Return Object for the current authenticated user only"""
         return self.queryset.filter(user=self.request.user).order_by('-name')
 
     def perform_create(self, serializer):
-        """Create a new tag"""
+        """Create a new category"""
         serializer.save(user=self.request.user)
