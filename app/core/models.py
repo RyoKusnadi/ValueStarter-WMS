@@ -60,3 +60,20 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Product(models.Model):
+    """Product Object"""
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE
+    )
+    title = models.CharField(max_length=255)
+    weight = models.DecimalField(max_digits=25, decimal_places=3)
+    price = models.DecimalField(max_digits=25, decimal_places=3)
+    link = models.CharField(max_length=255, blank=True)
+    Categories = models.ManyToManyField('Category')
+    tags = models.ManyToManyField('Tag')
+
+    def __str__(self):
+        return self.title

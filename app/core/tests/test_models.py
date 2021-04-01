@@ -58,3 +58,14 @@ class ModelTest(TestCase):
         )
 
         self.assertEqual(str(category), category.name)
+
+    def test_product_str(self):
+        """Test the Product String Representation"""
+        product = models.Product.objects.create(
+            user=sample_user(),
+            title='Buku Matematika kelas 5',
+            weight=2,
+            price=50.500
+        )
+
+        self.assertEqual(str(product), product.title)
