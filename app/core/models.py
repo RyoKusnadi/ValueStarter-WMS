@@ -39,7 +39,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class Tag(models.Model):
-    """Tag to be used for a recipe"""
+    """Tag to be used for a Tag"""
     name = models.CharField(max_length=255)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -72,7 +72,7 @@ class Product(models.Model):
     weight = models.DecimalField(max_digits=25, decimal_places=3)
     price = models.DecimalField(max_digits=25, decimal_places=3)
     link = models.CharField(max_length=255, blank=True)
-    Categories = models.ManyToManyField('Category')
+    categories = models.ManyToManyField('Category')
     tags = models.ManyToManyField('Tag')
 
     def __str__(self):
