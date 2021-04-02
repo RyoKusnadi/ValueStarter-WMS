@@ -117,8 +117,8 @@ class PrivateProductApiTest(TestCase):
         for key in payload.keys():
             self.assertEqual(payload[key], getattr(recipe, key))
 
-    def test_create_recipe_with_tags(self):
-        """Test creating a recipe with tags"""
+    def test_create_product_with_tags(self):
+        """Test creating a product with tags"""
         tag1 = sample_tag(user=self.user, name='new')
         tag2 = sample_tag(user=self.user, name='old')
         payload = {
@@ -136,14 +136,57 @@ class PrivateProductApiTest(TestCase):
         self.assertIn(tag1, tags)
         self.assertIn(tag2, tags)
 
-    def test_create_recipe_with_categories(self):
+    def test_create_product_with_categories(self):
         """Test creating recipe with ingredients"""
-        category1 = sample_category(user=self.user, name='Prawns')
-        category2 = sample_category(user=self.user, name='Ginger')
+        category1 = sample_category(user=self.user, name='cat1')
+        category2 = sample_category(user=self.user,
+                                    name='cat2')
         payload = {
             'title': 'title with categories',
-            'ingredients': [category1.id, category2.id],
+            'categories': [category1.id, category2.id],
             'weight': 20,
             'price': 7.00
         }
         res = self.client.post(PRODUCT_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        product = Product.objects.get(id=res.data['id'])
+        categories = product.categories.all()
+        self.assertEqual(categories.count(), 2)
+        self.assertIn(category1, categories)
+        self.assertIn(category2, categories)
+
+    def test_partial_update_product(self):
+        """Test updating a product with patch"""
+        product = sample_product(user=self.user)
+        product.tags.add(sample_tag(user=self.user))
+        new_tag = sample_tag(user=self.user, name='old')
+
+        payload = {'title': 'Chicken Menu Recipe', 'tags': [new_tag.id]}
+        url = detail_url(product.id)
+        self.client.patch(url, payload)
+
+        product.refresh_from_db()
+        self.assertEqual(product.title, payload['title'])
+        tags = product.tags.all()
+        self.assertEqual(len(tags), 1)
+        self.assertIn(new_tag, tags)
+
+    def test_full_update_recipe(self):
+        """Test updating a recipe with put"""
+        product = sample_product(user=self.user)
+        product.tags.add(sample_tag(user=self.user))
+        payload = {
+            'title': 'title 1',
+            'weight': 25,
+            'price': 5.00
+        }
+        url = detail_url(product.id)
+        self.client.put(url, payload)
+
+        product.refresh_from_db()
+        self.assertEqual(product.title, payload['title'])
+        self.assertEqual(product.weight, payload['weight'])
+        self.assertEqual(product.price, payload['price'])
+        tags = product.tags.all()
+        self.assertEqual(len(tags), 0)
