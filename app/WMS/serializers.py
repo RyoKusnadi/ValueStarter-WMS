@@ -42,3 +42,12 @@ class ProductDetailSerializer(ProductSerializer):
     """Serialize a product detail"""
     categories = CategorySerializer(many=True, read_only=True)
     tags = TagSerializer(many=True, read_only=True)
+
+
+class ProductImageSerializer(serializers.ModelSerializer):
+    """Serializer for uploading image to product"""
+
+    class Meta:
+        model = Product
+        fields = ('id', 'image')
+        read_only_fields = ('id',)

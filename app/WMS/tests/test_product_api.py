@@ -1,3 +1,8 @@
+import tempfile
+import os
+
+from PIL import Image
+
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
@@ -9,6 +14,11 @@ from core.models import Product, Tag, Category
 from WMS.serializers import ProductSerializer, ProductDetailSerializer
 
 PRODUCT_URL = reverse('WMS:product-list')
+
+
+def image_upload_url(product_id):
+    """Return URL for product image upload"""
+    return reverse('WMS:product-upload-image', args=[product_id])
 
 
 def detail_url(product_id):
@@ -113,9 +123,9 @@ class PrivateProductApiTest(TestCase):
         res = self.client.post(PRODUCT_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        recipe = Product.objects.get(id=res.data['id'])
+        product = Product.objects.get(id=res.data['id'])
         for key in payload.keys():
-            self.assertEqual(payload[key], getattr(recipe, key))
+            self.assertEqual(payload[key], getattr(product, key))
 
     def test_create_product_with_tags(self):
         """Test creating a product with tags"""
@@ -130,14 +140,14 @@ class PrivateProductApiTest(TestCase):
         res = self.client.post(PRODUCT_URL, payload)
 
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        recipe = Product.objects.get(id=res.data['id'])
-        tags = recipe.tags.all()
+        product = Product.objects.get(id=res.data['id'])
+        tags = product.tags.all()
         self.assertEqual(tags.count(), 2)
         self.assertIn(tag1, tags)
         self.assertIn(tag2, tags)
 
     def test_create_product_with_categories(self):
-        """Test creating recipe with ingredients"""
+        """Test creating product with ingredients"""
         category1 = sample_category(user=self.user, name='cat1')
         category2 = sample_category(user=self.user,
                                     name='cat2')
@@ -190,3 +200,39 @@ class PrivateProductApiTest(TestCase):
         self.assertEqual(product.price, payload['price'])
         tags = product.tags.all()
         self.assertEqual(len(tags), 0)
+
+
+class ProductImageUploadTests(TestCase):
+
+    def setUp(self):
+        self.client = APIClient()
+        self.user = get_user_model().objects.create_user(
+            'user@londonappdev.com',
+            'testpass'
+        )
+        self.client.force_authenticate(self.user)
+        self.product = sample_product(user=self.user)
+
+    def tearDown(self):
+        self.product.image.delete()
+
+    def test_upload_image_to_product(self):
+        """Test uploading an image to product"""
+        url = image_upload_url(self.product.id)
+        with tempfile.NamedTemporaryFile(suffix='.jpg') as ntf:
+            img = Image.new('RGB', (10, 10))
+            img.save(ntf, format='JPEG')
+            ntf.seek(0)
+            res = self.client.post(url, {'image': ntf}, format='multipart')
+
+        self.product.refresh_from_db()
+        self.assertEqual(res.status_code, status.HTTP_200_OK)
+        self.assertIn('image', res.data)
+        self.assertTrue(os.path.exists(self.product.image.path))
+
+    def test_upload_product_bad_request(self):
+        """Test uploading an invalid product"""
+        url = image_upload_url(self.product.id)
+        res = self.client.post(url, {'image': 'notimage'}, format='multipart')
+
+        self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
