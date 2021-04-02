@@ -5,10 +5,25 @@ from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Product
-from WMS.serializers import ProductSerializer
+from core.models import Product, Tag, Category
+from WMS.serializers import ProductSerializer, ProductDetailSerializer
 
 PRODUCT_URL = reverse('WMS:product-list')
+
+
+def detail_url(product_id):
+    """Return Product Detail URL"""
+    return reverse('WMS:product-detail', args=[product_id])
+
+
+def sample_tag(user, name='New'):
+    """Create and return a sample tag"""
+    return Tag.objects.create(user=user, name=name)
+
+
+def sample_category(user, name='Book'):
+    """Create and Return a sample Category"""
+    return Category.objects.create(user=user, name=name)
 
 
 def sample_product(user, **params):
@@ -74,4 +89,16 @@ class PrivateProductApiTest(TestCase):
         serializer = ProductSerializer(products, many=True)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(len(res.data), 1)
+        self.assertEqual(res.data, serializer.data)
+
+    def test_view_product_detail(self):
+        """Test viewing a product detail"""
+        product = sample_product(user=self.user)
+        product.tags.add(sample_tag(user=self.user))
+        product.categories.add(sample_category(user=self.user))
+
+        url = detail_url(product.id)
+        res = self.client.get(url)
+
+        serializer = ProductDetailSerializer(product)
         self.assertEqual(res.data, serializer.data)

@@ -36,3 +36,9 @@ class ProductSerializer(serializers.ModelSerializer):
         fields = ('id', 'title', 'categories', 'tags', 'weight',
                   'price', 'link')
         read_only_fields = ('id',)
+
+
+class ProductDetailSerializer(ProductSerializer):
+    """Serialize a product detail"""
+    categories = CategorySerializer(many=True, read_only=True)
+    tags = TagSerializer(many=True, read_only=True)
