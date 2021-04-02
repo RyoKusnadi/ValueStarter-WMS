@@ -102,3 +102,48 @@ class PrivateProductApiTest(TestCase):
 
         serializer = ProductDetailSerializer(product)
         self.assertEqual(res.data, serializer.data)
+
+    def test_create_basic_product(self):
+        """Test creating product"""
+        payload = {
+            'title': 'test title',
+            'weight': 30,
+            'price': 5.00
+        }
+        res = self.client.post(PRODUCT_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Product.objects.get(id=res.data['id'])
+        for key in payload.keys():
+            self.assertEqual(payload[key], getattr(recipe, key))
+
+    def test_create_recipe_with_tags(self):
+        """Test creating a recipe with tags"""
+        tag1 = sample_tag(user=self.user, name='new')
+        tag2 = sample_tag(user=self.user, name='old')
+        payload = {
+            'title': 'test title with tag',
+            'tags': [tag1.id, tag2.id],
+            'weight': 60,
+            'price': 20.00
+        }
+        res = self.client.post(PRODUCT_URL, payload)
+
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        recipe = Product.objects.get(id=res.data['id'])
+        tags = recipe.tags.all()
+        self.assertEqual(tags.count(), 2)
+        self.assertIn(tag1, tags)
+        self.assertIn(tag2, tags)
+
+    def test_create_recipe_with_categories(self):
+        """Test creating recipe with ingredients"""
+        category1 = sample_category(user=self.user, name='Prawns')
+        category2 = sample_category(user=self.user, name='Ginger')
+        payload = {
+            'title': 'title with categories',
+            'ingredients': [category1.id, category2.id],
+            'weight': 20,
+            'price': 7.00
+        }
+        res = self.client.post(PRODUCT_URL, payload)
