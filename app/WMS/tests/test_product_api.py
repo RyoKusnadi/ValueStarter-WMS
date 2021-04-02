@@ -172,8 +172,8 @@ class PrivateProductApiTest(TestCase):
         self.assertEqual(len(tags), 1)
         self.assertIn(new_tag, tags)
 
-    def test_full_update_recipe(self):
-        """Test updating a recipe with put"""
+    def test_full_update_product(self):
+        """Test updating a product with put"""
         product = sample_product(user=self.user)
         product.tags.add(sample_tag(user=self.user))
         payload = {
