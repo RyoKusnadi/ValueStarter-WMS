@@ -78,13 +78,16 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
+# Note:
+# If Want to use Docker when running : Change Host in below into DB
+# If Want use normal command, please change into localhost
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'HOST': os.environ.get('DB_HOST'),
-        'NAME': os.environ.get('DB_NAME'),
-        'USER': os.environ.get('DB_USER'),
-        'PASSWORD': os.environ.get('DB_PASS'),
+        'HOST': 'db',
+        'NAME': 'app',
+        'USER': 'postgres',
+        'PASSWORD': 'dev',
         'PORT': 5432,
     }
 }
