@@ -7,6 +7,7 @@ router = DefaultRouter()
 router.register('tags', views.TagViewSet)
 router.register('categories', views.CategoryViewSet)
 router.register('products', views.ProductViewSet)
+router.register('deliveryorders', views.DeliveryOrderViewSet)
 
 app_name = 'WMS'
 

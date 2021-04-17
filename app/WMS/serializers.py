@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import Tag, Category, Product
+from core.models import Tag, Category, Product, DeliveryOrder
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -51,3 +51,23 @@ class ProductImageSerializer(serializers.ModelSerializer):
         model = Product
         fields = ('id', 'image')
         read_only_fields = ('id',)
+
+
+class DeliveryOrderSerializer(serializers.ModelSerializer):
+    """Serializer for DeliveryOrder objects"""
+    products = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Product.objects.all()
+    )
+
+    class Meta:
+        model = DeliveryOrder
+        fields = ('id', 'deliveryNumber', 'sentFrom', 'sentTo', 'fullAddress',
+                  'contactPerson', 'price', 'products')
+        read_only_fields = ('id',)
+
+
+class DeliveryOrderDetailSerializer(DeliveryOrderSerializer):
+    """Serialize a DeliveryOrder detail"""
+    products = ProductSerializer(many=True, read_only=True)
+
