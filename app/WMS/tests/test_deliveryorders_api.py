@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from core.models import DeliveryOrder, Product
-from WMS.serializers import DeliveryOrderSerializer, DeliveryOrderDetailSerializer
+from WMS.serializers import DeliveryOrderSerializer
 
 DELIVERYORDER_URL = reverse('WMS:deliveryorder-list')
 

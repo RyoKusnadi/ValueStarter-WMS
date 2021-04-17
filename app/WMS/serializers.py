@@ -70,4 +70,3 @@ class DeliveryOrderSerializer(serializers.ModelSerializer):
 class DeliveryOrderDetailSerializer(DeliveryOrderSerializer):
     """Serialize a DeliveryOrder detail"""
     products = ProductSerializer(many=True, read_only=True)
-
