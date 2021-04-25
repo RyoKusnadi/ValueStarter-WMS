@@ -30,7 +30,7 @@ class BaseProductAttrViewSet(viewsets.GenericViewSet,
 
     def perform_create(self, serializer):
         """Create a new object"""
-        serializer.save(user=self.request.user)
+        serializer.get_or_create(user=self.request.user)
 
 
 class TagViewSet(BaseProductAttrViewSet):
