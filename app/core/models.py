@@ -50,7 +50,7 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class Tag(models.Model):
     """Tag to be used for a Tag"""
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, primary_key=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -62,7 +62,7 @@ class Tag(models.Model):
 
 class Category(models.Model):
     """Category to be used for a Product"""
-    name = models.CharField(max_length=255)
+    name = models.CharField(max_length=255, primary_key=True)
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -78,12 +78,12 @@ class Product(models.Model):
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE
     )
-    title = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, primary_key=True)
     weight = models.DecimalField(max_digits=25, decimal_places=3)
     price = models.DecimalField(max_digits=25, decimal_places=3)
     link = models.CharField(max_length=255, blank=True)
-    categories = models.ManyToManyField('Category')
-    tags = models.ManyToManyField('Tag')
+    category = models.ForeignKey(Category, on_delete=models.CASCADE)
+    tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     image = models.ImageField(null=True, upload_to=product_image_file_path)
 
     def __str__(self):

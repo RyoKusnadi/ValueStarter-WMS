@@ -7,8 +7,7 @@ class TagSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Tag
-        fields = ('id', 'name')
-        read_only_fields = ('id',)
+        fields = ('name',)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -16,26 +15,24 @@ class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Category
-        fields = ('id', 'name')
-        read_only_fields = ('id',)
+        fields = ('name',)
 
 
 class ProductSerializer(serializers.ModelSerializer):
     """Serializer for Product objects"""
-    categories = serializers.PrimaryKeyRelatedField(
-        many=True,
+    category = serializers.PrimaryKeyRelatedField(
+        many=False,
         queryset=Category.objects.all()
     )
-    tags = serializers.PrimaryKeyRelatedField(
-        many=True,
+    tag = serializers.PrimaryKeyRelatedField(
+        many=False,
         queryset=Tag.objects.all()
     )
 
     class Meta:
         model = Product
-        fields = ('id', 'title', 'categories', 'tags', 'weight',
+        fields = ('title', 'category', 'tag', 'weight',
                   'price', 'link')
-        read_only_fields = ('id',)
 
 
 class ProductDetailSerializer(ProductSerializer):

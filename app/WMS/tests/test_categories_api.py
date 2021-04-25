@@ -5,7 +5,7 @@ from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
 
-from core.models import Category, Product
+from core.models import Category
 from WMS.serializers import CategorySerializer
 
 CATEGORIES_URL = reverse('WMS:category-list')
@@ -74,49 +74,3 @@ class PrivateCategoriesApiTests(TestCase):
         payload = {'name': ''}
         res = self.client.post(CATEGORIES_URL, payload)
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
-
-    def test_retrieve_categories_assigned_to_products(self):
-        """Test filtering categories by those assigned to products"""
-        category1 = Category.objects.create(
-            user=self.user, name='New'
-        )
-        category2 = Category.objects.create(
-            user=self.user, name='Old'
-        )
-        product = Product.objects.create(
-            title='New book',
-            weight=5,
-            price=10,
-            user=self.user
-        )
-        product.categories.add(category1)
-
-        res = self.client.get(CATEGORIES_URL, {'assigned_only': 1})
-
-        serializer1 = CategorySerializer(category1)
-        serializer2 = CategorySerializer(category2)
-        self.assertIn(serializer1.data, res.data)
-        self.assertNotIn(serializer2.data, res.data)
-
-    def test_retrieve_categories_assigned_unique(self):
-        """Test filtering ingredients by assigned returns unique items"""
-        category = Category.objects.create(user=self.user, name='Book')
-        Category.objects.create(user=self.user, name='Dictionary')
-        product1 = Product.objects.create(
-            title='Old Book',
-            weight=30,
-            price=12.00,
-            user=self.user
-        )
-        product1.categories.add(category)
-        product2 = Product.objects.create(
-            title='new dict',
-            weight=20,
-            price=5.00,
-            user=self.user
-        )
-        product2.categories.add(category)
-
-        res = self.client.get(CATEGORIES_URL, {'assigned_only': 1})
-
-        self.assertEqual(len(res.data), 1)
