@@ -11,7 +11,7 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from core.models import Product, Tag, Category
-from WMS.serializers import ProductSerializer, ProductDetailSerializer
+from WMS.serializers import ProductSerializer
 
 PRODUCT_URL = reverse('WMS:product-list')
 
@@ -71,47 +71,6 @@ class PrivateProductApiTest(TestCase):
             'tester123  '
         )
         self.client.force_authenticate(self.user)
-
-    def test_retrieve_product(self):
-        """Test retrieving a list of product"""
-        sample_product(user=self.user)
-        sample_product(user=self.user)
-
-        res = self.client.get(PRODUCT_URL)
-
-        products = Product.objects.all().order_by('id')
-        serializer = ProductSerializer(products, many=True)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data, serializer.data)
-
-    def test_products_limited_to_user(self):
-        """Test retrieving products for user"""
-        user2 = get_user_model().objects.create_user(
-            'tester2@domain.com',
-            'testing'
-        )
-        sample_product(user=user2)
-        sample_product(user=self.user)
-
-        res = self.client.get(PRODUCT_URL)
-
-        products = Product.objects.filter(user=self.user)
-        serializer = ProductSerializer(products, many=True)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data), 1)
-        self.assertEqual(res.data, serializer.data)
-
-    def test_view_product_detail(self):
-        """Test viewing a product detail"""
-        product = sample_product(user=self.user)
-        product.tags.add(sample_tag(user=self.user))
-        product.categories.add(sample_category(user=self.user))
-
-        url = detail_url(product.id)
-        res = self.client.get(url)
-
-        serializer = ProductDetailSerializer(product)
-        self.assertEqual(res.data, serializer.data)
 
     def test_create_basic_product(self):
         """Test creating product"""

@@ -44,21 +44,6 @@ class PrivateCategoriesApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         self.assertEqual(res.data, serializer.data)
 
-    def test_categories_limited_to_user(self):
-        """Test that categories returned are for the authenticated user"""
-        user2 = get_user_model().objects.create_user(
-            'other@domain.com',
-            'testing'
-        )
-        Category.objects.create(user=user2, name='Pencil')
-        category = Category.objects.create(user=self.user, name='Accessories')
-
-        res = self.client.get(CATEGORIES_URL)
-
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data), 1)
-        self.assertEqual(res.data[0]['name'], category.name)
-
     def test_create_categories_successful(self):
         """Test Creating a new tag"""
         payload = {'name': 'super book'}

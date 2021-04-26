@@ -6,7 +6,6 @@ from rest_framework import status
 from rest_framework.test import APIClient
 
 from core.models import DeliveryOrder, Product
-from WMS.serializers import DeliveryOrderSerializer
 
 DELIVERYORDER_URL = reverse('WMS:deliveryorder-list')
 
@@ -66,35 +65,6 @@ class PrivateDeliveryOrderApiTest(TestCase):
             'tester123  '
         )
         self.client.force_authenticate(self.user)
-
-    def test_retrieve_deliveryorder(self):
-        """Test retrieving a list of product"""
-        sample_deliveryorder(user=self.user)
-        sample_deliveryorder(user=self.user)
-
-        res = self.client.get(DELIVERYORDER_URL)
-
-        deliveryorders = DeliveryOrder.objects.all().order_by('id')
-        serializer = DeliveryOrderSerializer(deliveryorders, many=True)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(res.data, serializer.data)
-
-    def test_deliveryorders_limited_to_user(self):
-        """Test retrieving products for user"""
-        user2 = get_user_model().objects.create_user(
-            'tester2@domain.com',
-            'testing'
-        )
-        sample_deliveryorder(user=user2)
-        sample_deliveryorder(user=self.user)
-
-        res = self.client.get(DELIVERYORDER_URL)
-
-        deliveryorders = DeliveryOrder.objects.filter(user=self.user)
-        serializer = DeliveryOrderSerializer(deliveryorders, many=True)
-        self.assertEqual(res.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(res.data), 1)
-        self.assertEqual(res.data, serializer.data)
 
     def test_create_basic_deliveryOrder(self):
         """Test creating product"""
