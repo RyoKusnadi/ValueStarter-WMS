@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from core.models import Tag, Category, Product, DeliveryOrder
+from core.models import Tag, Category, Product, DeliveryOrder, Stock
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -68,5 +68,23 @@ class DeliveryOrderSerializer(serializers.ModelSerializer):
 
 
 class DeliveryOrderDetailSerializer(DeliveryOrderSerializer):
+    """Serialize a DeliveryOrder detail"""
+    products = ProductSerializer(many=True, read_only=True)
+
+
+class StockSerializer(serializers.ModelSerializer):
+    """Serializer for DeliveryOrder objects"""
+    products = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Product.objects.all()
+    )
+
+    class Meta:
+        model = Stock
+        fields = ('id', 'StockNo', 'Quantity', 'Location', 'products')
+        read_only_fields = ('id',)
+
+
+class StockDetailSerializer(StockSerializer):
     """Serialize a DeliveryOrder detail"""
     products = ProductSerializer(many=True, read_only=True)

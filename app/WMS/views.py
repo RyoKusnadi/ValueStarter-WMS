@@ -4,7 +4,7 @@ from rest_framework import viewsets, mixins, status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
 
-from core.models import Tag, Category, Product, DeliveryOrder
+from core.models import Tag, Category, Product, DeliveryOrder, Stock
 from WMS import serializers
 
 
@@ -25,7 +25,7 @@ class BaseProductAttrViewSet(viewsets.GenericViewSet,
             queryset = queryset.filter(product__isnull=False)
 
         return queryset.filter(
-            user=self.request.user
+            # user=self.request.user
         ).order_by('-name').distinct()
 
     def perform_create(self, serializer):
@@ -130,6 +130,39 @@ class DeliveryOrderViewSet(viewsets.ModelViewSet):
         """Return appropriate serializer class"""
         if self.action == 'retrieve':
             return serializers.DeliveryOrderSerializer
+
+        return self.serializer_class
+
+    def perform_create(self, serializer):
+        """create a new DeliveryOrder"""
+        serializer.save(user=self.request.user)
+
+
+class StockViewSet(viewsets.ModelViewSet):
+    """Manage DeliveryOrder in the database"""
+    serializer_class = serializers.StockSerializer
+    queryset = Stock.objects.all()
+    authentication_classes = (TokenAuthentication,)
+    permission_classes = (IsAuthenticated,)
+
+    def _params_to_ints(self, qs):
+        """Convert a list of string ids to a list of integers"""
+        return [int(str_id) for str_id in qs.split(',')]
+
+    def get_queryset(self):
+        """Retrieve the products to the authenticated user"""
+        products = self.request.query_params.get('products')
+        queryset = self.queryset
+        if products:
+            product_ids = self._params_to_ints(products)
+            queryset = queryset.filter(tags__id__in=product_ids)
+
+        return queryset.filter(user=self.request.user)
+
+    def get_serializer_class(self):
+        """Return appropriate serializer class"""
+        if self.action == 'retrieve':
+            return serializers.StockSerializer
 
         return self.serializer_class
 
