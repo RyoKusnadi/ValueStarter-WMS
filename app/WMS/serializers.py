@@ -22,8 +22,14 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     """Serializer for Product objects"""
-    categories = CategorySerializer(many=True)
-    tags = TagSerializer(many=True)
+    categories = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Category.objects.all()
+    )
+    tags = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Tag.objects.all()
+    )
 
     class Meta:
         model = Product
@@ -49,7 +55,10 @@ class ProductImageSerializer(serializers.ModelSerializer):
 
 class DeliveryOrderSerializer(serializers.ModelSerializer):
     """Serializer for DeliveryOrder objects"""
-    products = ProductSerializer(many=True)
+    products = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Product.objects.all()
+    )
 
     class Meta:
         model = DeliveryOrder
@@ -65,7 +74,10 @@ class DeliveryOrderDetailSerializer(DeliveryOrderSerializer):
 
 class StockSerializer(serializers.ModelSerializer):
     """Serializer for DeliveryOrder objects"""
-    products = ProductSerializer(many=True)
+    products = serializers.PrimaryKeyRelatedField(
+        many=True,
+        queryset=Product.objects.all()
+    )
 
     class Meta:
         model = Stock
